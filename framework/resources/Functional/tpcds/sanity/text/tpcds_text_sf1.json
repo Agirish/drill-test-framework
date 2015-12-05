@@ -24,7 +24,7 @@
         },
 	{
             "mode": "gen",
-            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_text_sanity_views\" \"/drill/testdata/tpcds_sf1/text/sanity_views\" \"resources/Datasouces/tpcds/createViewsText.sql\"",
+            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_text_sanity_views\" \"/drill/testdata/tpcds_sf1/text/sanity_views\" \"resources/Datasources/tpcds/createViewsText.sql\"",
 	    "dest": ""
         }
     ]

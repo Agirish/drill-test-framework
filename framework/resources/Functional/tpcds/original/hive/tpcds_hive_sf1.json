@@ -1,14 +1,15 @@
 {
-    "testId": "tpcds_sf1_variants_text",
+    "testId": "tpcds_sf1_original_hive_text",
     "type": "group",
     "description": "Test TPCDS SF 1 original queries on text (with views on top) via jdbc",
     "categories": [
         "smoke"
     ],
+    "dependencies" : ["hive"],
     "matrices": [
         {
             "query-file": ".*.sql",
-            "schema": "dfs.tpcds_sf1_json_orig_views",
+            "schema": "hive.tpcds01_text",
             "output-format": "tsv",
             "expected-file": ".*.e_tsv",
             "verification-type": [
@@ -17,15 +18,15 @@
         }
     ],
     "datasources": [
-        {
+       {
             "mode": "cp",
             "src": "Datasources/text/tpcds/sf1",
             "dest": "tpcds_sf1/text"
         },
-	{
+        {
             "mode": "gen",
-	    "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_json_orig\" \"/drill/testdata/tpcds_sf1/json\" \"resources/Datasources/tpcds/createTablesJson.sql\"",
+            "src": "bin/execHive.sh resources/Datasources/hive_storage/tpcds01_text.ddl",
             "dest": ""
-        }
+        } 
     ]
 }

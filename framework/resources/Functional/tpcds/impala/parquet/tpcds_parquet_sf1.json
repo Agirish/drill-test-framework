@@ -24,7 +24,7 @@
         },
 	{
             "mode": "gen",
-            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_parquet_impala_views\" \"/drill/testdata/tpcds_sf1/parquet/impala_views\" \"resources/Datasouces/tpcds/createViewsParquet.sql\"",
+            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_parquet_impala_views\" \"/drill/testdata/tpcds_sf1/parquet/impala_views\" \"resources/Datasources/tpcds/createViewsParquet.sql\"",
 	    "dest": ""
         }
     ]
