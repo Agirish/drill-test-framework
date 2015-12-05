@@ -1,5 +1,5 @@
 {
-    "testId": "tpcds_sf1_sanity_parquet",
+    "testId": "tpcds_sf1_original_parquet",
     "type": "group",
     "description": "Test TPCDS SF 1 queries via jdbc",
     "categories": [
@@ -8,7 +8,7 @@
     "matrices": [
         {
             "query-file": ".*.sql",
-            "schema": "dfs.tpcds_sf1_parquet_sanity_views",
+            "schema": "dfs.tpcds_sf1_parquet_orig_views",
             "output-format": "tsv",
             "expected-file": ".*.e_tsv",
             "verification-type": [
@@ -24,7 +24,7 @@
         },
 	{
             "mode": "gen",
-            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_parquet_sanity_views\" \"/drill/testdata/tpcds_sf1/parquet/sanity_views\" \"resources/Datasouces/tpcds/createViewsParquet.sql\"",
+            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_parquet_orig_views\" \"/drill/testdata/tpcds_sf1/parquet/orig_views\" \"resources/Datasouces/tpcds/createViewsParquet.sql\"",
 	    "dest": ""
         }
     ]

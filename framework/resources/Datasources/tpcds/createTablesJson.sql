@@ -1,7 +1,5 @@
 alter session set `store.format` = 'json';
 
-use dfs.tpcds_sf1_json;
-
 create table customer as select 
  case when (columns[0]='') then cast(null as integer) else cast(columns[0] as integer) end as c_customer_sk, 
  case when (columns[1]='') then cast(null as varchar(200)) else cast(columns[1] as varchar(200)) end as c_customer_id, 

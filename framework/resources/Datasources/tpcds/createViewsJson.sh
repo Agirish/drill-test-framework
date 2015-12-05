@@ -1,5 +1,8 @@
 #!/bin/sh
 
-hadoop fs -test -d /drill/testdata/tpcds_sf1/json/views ;if [ `echo $?` -eq 1 ]; then hadoop fs -mkdir /drill/testdata/tpcds_sf1/json/views; fi
+workspace=$1
+path=$2
 
-${DRILL_HOME}/bin/sqlline -n ${USERNAME} -p ${PASSWORD} -u "jdbc:drill:schema=dfs.tpcds_sf1_json_views;drillbit=${DRILL_STORAGE_PLUGIN_SERVER}"  --run=resources/Datasources/tpcds/createViewsJson.sql
+hadoop fs -test -d $path ;if [ `echo $?` -eq 0 ]; then hadoop fs -rmr $path; hadoop fs -mkdir $path; else hadoop fs -mkdir $path; fi
+
+${DRILL_HOME}/bin/sqlline -n ${USERNAME} -p ${PASSWORD} -u "jdbc:drill:schema=$workspace;drillbit=${DRILL_STORAGE_PLUGIN_SERVER}"  --run=resources/Datasources/tpcds/createViewsJson.sql

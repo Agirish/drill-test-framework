@@ -8,7 +8,7 @@
     "matrices": [
         {
             "query-file": ".*.q",
-            "schema": "dfs.tpcds_sf1_parquet_views",
+            "schema": "dfs.tpcds_sf1_parquet_impala_views",
             "output-format": "tsv",
             "expected-file": ".*.e_tsv",
             "verification-type": [
@@ -24,8 +24,8 @@
         },
 	{
             "mode": "gen",
-            "src": "Datasources/tpcds/createViewsParquet.sh",
-            "dest": ""
+            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_parquet_impala_views\" \"/drill/testdata/tpcds_sf1/parquet/impala_views\" \"resources/Datasouces/tpcds/createViewsParquet.sql\"",
+	    "dest": ""
         }
     ]
 }

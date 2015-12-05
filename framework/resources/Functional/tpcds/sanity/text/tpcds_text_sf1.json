@@ -8,7 +8,7 @@
     "matrices": [
         {
             "query-file": ".*.sql",
-            "schema": "dfs.tpcds_sf1_text_views",
+            "schema": "dfs.tpcds_sf1_text_sanity_views",
             "output-format": "tsv",
             "expected-file": ".*.e_tsv",
             "verification-type": [
@@ -24,8 +24,8 @@
         },
 	{
             "mode": "gen",
-            "src": "Datasources/tpcds/createViewsText.sh",
-            "dest": ""
+            "src": "Datasources/tpcds/create.sh \"dfs.tpcds_sf1_text_sanity_views\" \"/drill/testdata/tpcds_sf1/text/sanity_views\" \"resources/Datasouces/tpcds/createViewsText.sql\"",
+	    "dest": ""
         }
     ]
 }

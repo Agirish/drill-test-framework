@@ -1,5 +1,3 @@
-use dfs.tpcds_sf1_parquet_views;
-
 create or replace view customer as select
 cast(c_customer_sk as integer)  as c_customer_sk,
 cast(c_customer_id as varchar(200))  as c_customer_id,
