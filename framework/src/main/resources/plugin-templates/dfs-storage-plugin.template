@@ -300,6 +300,46 @@
       "writable": true,
       "defaultInputFormat": "parquet"
     },
+    "tpcds_sf1_text_orig_views": {
+      "location": "/drill/testdata/tpcds_sf1/text/orig_views",
+      "writable": true,
+      "defaultInputFormat": "psv"
+    },
+    "tpcds_sf1_parquet_orig_views": {
+      "location": "/drill/testdata/tpcds_sf1/parquet/orig_views",
+      "writable": true,
+      "defaultInputFormat": "parquet"
+    },
+    "tpcds_sf1_parquet_sanity_views": {
+      "location": "/drill/testdata/tpcds_sf1/parquet/sanity_views",
+      "writable": true,
+      "defaultInputFormat": "parquet"
+    },
+    "tpcds_sf1_text_sanity_views": {
+      "location": "/drill/testdata/tpcds_sf1/text/sanity_views",
+      "writable": true,
+      "defaultInputFormat": "psv"
+    },
+    "tpcds_sf1_text_variants_views": {
+      "location": "/drill/testdata/tpcds_sf1/text/variants_views",
+      "writable": true,
+      "defaultInputFormat": "psv"
+    },
+    "tpcds_sf1_parquet_variants_views": {
+      "location": "/drill/testdata/tpcds_sf1/parquet/variants_views",
+      "writable": true,
+      "defaultInputFormat": "parquet"
+    },
+    "tpcds_sf1_parquet_impala_views": {
+      "location": "/drill/testdata/tpcds_sf1/parquet/impala_views",
+      "writable": true,
+      "defaultInputFormat": "parquet"
+    },
+    "tpcds_sf1_text_impala_views": {
+      "location": "/drill/testdata/tpcds_sf1/text/impala_views",
+      "writable": true,
+      "defaultInputFormat": "psv"
+    },
     "tpcds_parquet_sf1": {
       "location": "/drill/testdata/tpcds/parquet/sf1",
       "writable": true,
