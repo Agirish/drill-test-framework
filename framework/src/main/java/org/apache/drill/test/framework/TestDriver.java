@@ -556,6 +556,9 @@ public class TestDriver {
       } catch (FileAlreadyExistsException e) {
     	LOG.debug("The source file " + src
     	          + " already exists in destination.  Skipping the copy.");
+      } catch (IOException e) {
+        LOG.debug("The source file " + src
+                  + " already exists in destination.  Skipping the copy.");
       }
     } else {
       LOG.debug("The source file " + src
