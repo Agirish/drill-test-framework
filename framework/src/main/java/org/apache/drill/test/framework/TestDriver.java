@@ -503,7 +503,8 @@ public class TestDriver {
             try {
               Path src = new Path(CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR"), datasource.src);
               Path dest = new Path(drillTestData, datasource.dest);
-              hdfsCopy(src, dest, false, fsMode);
+              dfsCopy(datasource, fsMode);
+              //hdfsCopy(src, dest, false, fsMode);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
@@ -583,6 +584,44 @@ public class TestDriver {
     } else {
       LOG.debug("The source file " + src
           + " already exists in destination.  Skipping the copy.");
+    }
+  }
+
+  private static void dfsCopy(DataSource datasource, String fsMode)
+          throws IOException {
+
+    Path src = new Path(CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR") + "/" + datasource.src);
+    Path dest = new Path(CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR") + "/" + datasource.dest);
+
+    LOG.debug("Copy " + src + " to " + dest);
+
+    FileSystem fs;
+    if (fsMode.equals(LOCALFS)) {
+      fs = FileSystem.getLocal(conf);
+    } else {
+      fs = FileSystem.get(conf);
+    }
+
+    FileSystem localFs = FileSystem.getLocal(conf);
+    if (localFs.getFileStatus(src).isDir()) {
+      for (FileStatus file : localFs.listStatus(src)) {
+        datasource.src=file.getPath().getName();
+        datasource.dest=(new Path(dest,datasource.src)).getName();
+        dfsCopy(datasource, fsMode);
+      }
+    } else if (!fs.exists(dest)) {
+      try {
+        fs.copyFromLocalFile(false, false, src, dest);
+      } catch (FileAlreadyExistsException e) {
+        LOG.debug("The source file " + src
+                + " already exists in destination.  Skipping the copy.");
+      } catch (IOException e) {
+      LOG.debug("The source file " + src
+              + " already exists in destination.  Skipping the copy.");
+    }
+    } else {
+      LOG.debug("The source file " + src
+              + " already exists in destination.  Skipping the copy.");
     }
   }
 
