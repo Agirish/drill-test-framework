@@ -61,7 +61,7 @@ public class TestDriver {
   private String ipAddressPlugin = drillProperties
       .get("DRILL_STORAGE_PLUGIN_SERVER");
   private static final String CWD = System.getProperty("user.dir");
-  private String drillTestData = drillProperties.get("DRILL_TESTDATA");
+  private static String drillTestData = drillProperties.get("DRILL_TESTDATA");
   private String fsMode = drillProperties.get("FS_MODE");
   private Connection connection = null;
   private ConnectionPool connectionPool = null;
@@ -501,9 +501,7 @@ public class TestDriver {
           @Override
           public void run() {
             try {
-              Path src = new Path(CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR"), datasource.src);
-              Path dest = new Path(drillTestData, datasource.dest);
-              hdfsCopy(src, dest, false, fsMode);
+              dfsCopy(datasource, fsMode);
             } catch (IOException e) {
               throw new RuntimeException(e);
             }
@@ -555,35 +553,57 @@ public class TestDriver {
       }
     }
   }
-  
 
-  private static void hdfsCopy(Path src, Path dest, boolean overWrite, String fsMode)
-      throws IOException {
-    LOG.debug("Copy " + src + " to " + dest);
+  private static void dfsCopy(Path src, Path dest, String fsMode)
+          throws IOException {
+
     FileSystem fs;
+
     if (fsMode.equals(LOCALFS)) {
       fs = FileSystem.getLocal(conf);
     } else {
       fs = FileSystem.get(conf);
     }
+
     FileSystem localFs = FileSystem.getLocal(conf);
-    if (localFs.getFileStatus(src).isDir()) {
+
+    if (localFs.getFileStatus(src).isDirectory()) {
       for (FileStatus file : localFs.listStatus(src)) {
-        Path newSrc = file.getPath();
-        Path newDest = new Path(dest, newSrc.getName());
-        hdfsCopy(file.getPath(), newDest, overWrite, fsMode);
-      }
-    } else if (!fs.exists(dest) || overWrite) {
-      try {
-        fs.copyFromLocalFile(false, overWrite, src, dest);
-      } catch (FileAlreadyExistsException e) {
-    	LOG.debug("The source file " + src
-    	          + " already exists in destination.  Skipping the copy.");
+        Path src_mod=file.getPath();
+        dfsCopy(src_mod, dest, fsMode);
       }
     } else {
-      LOG.debug("The source file " + src
-          + " already exists in destination.  Skipping the copy.");
+        if (!fs.exists(dest)) {
+          try {
+            if(!fs.exists(dest.getParent())) {
+              fs.mkdirs(dest.getParent());
+              LOG.debug("Attempting to create directory "+dest.getParent());
+            }
+            fs.copyFromLocalFile(src, dest);
+          } catch (FileAlreadyExistsException e) {
+            LOG.debug("The source file " + src
+                    + " already exists in destination.  Skipping the copy.");
+          } catch (IOException e) {
+            LOG.debug("The source file " + src
+                    + " already exists in destination.  Skipping the copy.");
+          }
+        } else {
+          LOG.debug("The source file " + src
+                  + " already exists in destination.  Skipping the copy.");
+        }
     }
+  }
+
+  private static void dfsCopy(DataSource datasource, String fsMode)
+          throws IOException {
+
+    Path src = new Path(CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR") + "/" + datasource.src);
+    Path dest = new Path(drillTestData, datasource.dest);
+
+    LOG.debug("Copy " + src + " to " + dest);
+
+    dfsCopy(src, dest, fsMode);
+
   }
 
   public static void runGenerateScript(DataSource datasource) {
