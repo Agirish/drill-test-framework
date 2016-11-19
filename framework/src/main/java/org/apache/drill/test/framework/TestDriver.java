@@ -33,33 +33,25 @@ import org.apache.log4j.Logger;
 import org.ojai.Document;
 import org.ojai.json.Json;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.sql.*;
 import java.util.*;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.sql.DatabaseMetaData;
+import java.util.Date;
 
 public class TestDriver {
+
   public static final String LOCALFS = "local";
   public static final String DFS = "dfs";
   private static final Logger LOG = Logger.getLogger(TestDriver.class);
   private static final String LINE_BREAK = "----------------------------------------------------------------------------------------------------------------";
-  protected static Map<String, String> drillProperties = Utils
-      .getDrillTestProperties();
+  protected static Map<String, String> drillProperties = Utils.getDrillTestProperties();
   public static final String drillOutputDirName = drillProperties.get("DRILL_OUTPUT_DIR");
   public static String drillReportDirName = drillProperties.get("DRILL_REPORT_DIR");
-  private String restartDrillScript = drillProperties
-      .get("RESTART_DRILL_SCRIPT");
-  private String ipAddressPlugin = drillProperties
-      .get("DRILL_STORAGE_PLUGIN_SERVER");
+  private String restartDrillScript = drillProperties.get("RESTART_DRILL_SCRIPT");
+  private String ipAddressPlugin = drillProperties.get("DRILL_STORAGE_PLUGIN_SERVER");
   private static final String CWD = System.getProperty("user.dir");
   private String drillTestData = drillProperties.get("DRILL_TESTDATA");
   private String fsMode = drillProperties.get("FS_MODE");
@@ -475,7 +467,14 @@ public class TestDriver {
   }
 
   private void prepareData(List<DrillTestCase> tests) throws Exception {
+
+    CancelingExecutor copyExecutor = new CancelingExecutor(OPTIONS.threads, Integer.MAX_VALUE);
+    CancelingExecutor genExecutor = new CancelingExecutor(OPTIONS.threads, Integer.MAX_VALUE);
+    List<Cancelable> copyTasks = Lists.newArrayList();
+    List<Cancelable> genTasks = Lists.newArrayList();
     Set<DataSource> dataSources = new HashSet<>();
+    boolean restartDrillbits = false;
+
     for (TestCaseModeler test : tests) {
       List<DataSource> dataSourceList = test.datasources;
       if (dataSourceList != null) {
@@ -483,12 +482,6 @@ public class TestDriver {
       }
     }
 
-    boolean restartDrillbits = false;
-
-    CancelingExecutor copyExecutor = new CancelingExecutor(OPTIONS.threads, Integer.MAX_VALUE);
-    CancelingExecutor genExecutor = new CancelingExecutor(OPTIONS.threads, Integer.MAX_VALUE);
-    List<Cancelable> copyTasks = Lists.newArrayList();
-    List<Cancelable> genTasks = Lists.newArrayList();
     for (final TestCaseModeler.DataSource datasource : dataSources) {
       String mode = datasource.mode;
       if (mode.equals("cp")) {
@@ -519,7 +512,7 @@ public class TestDriver {
 
           @Override
           public void run() {
-            runGenerateScript(datasource);
+            runGenerateScript(datasource.src);
           }
         };
         genTasks.add(task);
@@ -529,33 +522,32 @@ public class TestDriver {
     }
 
     final Stopwatch stopwatch = Stopwatch.createStarted();
-    LOG.info(">> COPYING DATA..");
+    LOG.info("COPYING DATA");
     copyExecutor.executeAll(copyTasks);
     copyExecutor.close();
-    LOG.info(">> TOOK " + stopwatch + " TO COPY DATA.");
+    LOG.info(">> Took " + stopwatch + " to copy data");
     stopwatch.reset().start();
-    LOG.info(">> GENERATING DATA..");
+    LOG.info("GENERATING DATA");
     genExecutor.executeAll(genTasks);
     genExecutor.close();
-    LOG.info(">> TOOK " + stopwatch + " TO GENERATE DATA.");
+    LOG.info(">> Took " + stopwatch + " to generate data");
     if (restartDrillbits) {
-      LOG.info("Restarting drillbits");
+      LOG.info("Restarting drill-bits");
       int exitCode = 0;
-      String command = null;
+      String command = "";
       try {
         command = "/bin/bash " + restartDrillScript;
-        LOG.info("Running command: " + command);
+        LOG.info("Running script: " + command);
         exitCode = Runtime.getRuntime().exec(command).waitFor();
       } catch (Exception e) {
-        LOG.error("Error: Failed to execute the command " + command + ".");
+        LOG.error("ERROR: Failed to execute script " + command);
       }
       if (exitCode != 0) {
-        throw new RuntimeException("Error executing the command " + command
-            + " has return code " + exitCode);
+        throw new RuntimeException("ERROR: Script " + command
+                + " has a non-zero exit status, " + exitCode);
       }
     }
   }
-  
 
   private static void hdfsCopy(Path src, Path dest, boolean overWrite, String fsMode)
       throws IOException {
@@ -586,20 +578,23 @@ public class TestDriver {
     }
   }
 
-  public static void runGenerateScript(DataSource datasource) {
-	String command = CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR") + "/" + datasource.src;
+  public static void runGenerateScript(String script) {
+
+	String command = CWD + "/" + Utils.getDrillTestProperties().get("DRILL_TEST_DATA_DIR") + "/" + script;
 	LOG.info("Running command " + command);
-	CmdConsOut cmdConsOut = null;
-	try {
+
+	CmdConsOut cmdConsOut;
+
+    try {
 	  cmdConsOut = Utils.execCmd(command);
 	  LOG.debug(cmdConsOut.consoleOut);
 	} catch (Exception e) {
-	  LOG.error("Error: Failed to execute the command " + command + ".");
+	  LOG.error("ERROR: Failed to execute script " + command);
 	  throw new RuntimeException(e);
 	}
 	if (cmdConsOut.exitCode != 0) {
-	  throw new RuntimeException("Error executing the command " + command
-	          + " has return code " + cmdConsOut.exitCode);
+	  throw new RuntimeException("ERROR: Script " + command
+	          + " has a non-zero exit status, " + cmdConsOut.exitCode);
 	}
   }
   
