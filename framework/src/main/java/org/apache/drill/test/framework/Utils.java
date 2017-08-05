@@ -194,6 +194,11 @@ public class Utils implements DrillDefaults {
             }
           }
         }
+	if (modeler.matrices.get(0).verificationTypes.get(0) != null) {
+            if (TestDriver.cmdParam.excludeDependenciesAsList().contains(modeler.matrices.get(0).verificationTypes.get(0))) {
+              skipSuite = true;
+            }
+        }
         if (skipSuite) {continue;}
           List<File> testQueryFiles = searchFiles(testDefFile.getParentFile(),
                   queryFileExtension);
